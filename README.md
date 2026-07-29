@@ -4,13 +4,13 @@ A modern full-stack web application featuring a Spring Boot REST API backend and
 
 ---
 
-## 📁 Project Architecture & Workflows
+## 📁 Project Architecture
 
 ```
 codes-sravan/
 ├── .github/workflows/
-│   ├── backend-ci-cd.yml     # Build & Push backend image to Docker Hub
-│   └── frontend-ci-cd.yml    # Build & Push frontend image to Docker Hub
+│   ├── backend-ci-cd.yml     # Build & push backend Docker image to Docker Hub
+│   └── frontend-ci-cd.yml    # Build & push frontend Docker image to Docker Hub
 ├── backend/
 │   ├── Dockerfile            # Maven 3.9 + Java 17 multi-stage build
 │   ├── .dockerignore
@@ -20,9 +20,7 @@ codes-sravan/
 │   ├── nginx.conf
 │   ├── .dockerignore
 │   └── src/
-├── docker-compose.yml        # Local development setup
-├── docker-compose.prod.yml   # Production EC2 Docker Hub deployment
-├── deploy-ec2.sh             # EC2 pull & deploy script
+├── docker-compose.yml        # Final Docker Compose file for local & server deployment
 └── README.md
 ```
 
@@ -39,38 +37,29 @@ Set these in your GitHub Repo -> **Settings** -> **Secrets and variables** -> **
 
 ---
 
-## 🐳 Docker Build & Push Workflow
+## 🚀 GitHub Actions CI/CD (Docker Image Build & Push)
 
-### Backend (`.github/workflows/backend-ci-cd.yml`)
-1. Checks out code and sets up JDK 17 (`temurin`).
-2. Builds Spring Boot package (`mvn clean package -DskipTests`).
-3. Logs into Docker Hub using `${{ secrets.DOCKERHUB_USERNAME }}` and `${{ secrets.DOCKERHUB_TOKEN }}`.
-4. Builds & pushes `${{ secrets.DOCKERHUB_USERNAME }}/auth-backend:latest`.
+1. **Backend Pipeline (`.github/workflows/backend-ci-cd.yml`)**:
+   - Triggers on changes to `backend/**`.
+   - Packages Spring Boot JAR with JDK 17 (`mvn clean package -DskipTests`).
+   - Builds Docker image and pushes to Docker Hub as `${{ secrets.DOCKERHUB_USERNAME }}/auth-backend:latest`.
 
-### Frontend (`.github/workflows/frontend-ci-cd.yml`)
-1. Checks out code and sets up Node 22.
-2. Builds production React bundle (`npm run build`).
-3. Logs into Docker Hub using `${{ secrets.DOCKERHUB_USERNAME }}` and `${{ secrets.DOCKERHUB_TOKEN }}`.
-4. Builds & pushes `${{ secrets.DOCKERHUB_USERNAME }}/auth-frontend:latest`.
+2. **Frontend Pipeline (`.github/workflows/frontend-ci-cd.yml`)**:
+   - Triggers on changes to `frontend/**`.
+   - Builds production React bundle with Node 22 (`npm run build`).
+   - Builds NGINX Docker image and pushes to Docker Hub as `${{ secrets.DOCKERHUB_USERNAME }}/auth-frontend:latest`.
 
 ---
 
-## ☁️ Deploying on AWS EC2
+## 🐳 Running with Docker Compose (`docker-compose.yml`)
 
-### Step 1: Connect to your EC2 instance over SSH
+### Local Build & Run
 ```bash
-ssh -i /path/to/key.pem ubuntu@YOUR_EC2_PUBLIC_IP
+docker compose up --build
 ```
 
-### Step 2: Login to Docker Hub & Pull Images
+### Running on Server / EC2 from Docker Hub
 ```bash
-echo "YOUR_DOCKERHUB_TOKEN" | docker login -u "YOUR_DOCKERHUB_USERNAME" --password-stdin
-docker pull YOUR_DOCKERHUB_USERNAME/auth-backend:latest
-docker pull YOUR_DOCKERHUB_USERNAME/auth-frontend:latest
-```
-
-### Step 3: Launch Containers using Docker Compose
-```bash
-export DOCKERHUB_USERNAME="YOUR_DOCKERHUB_USERNAME"
-docker compose -f docker-compose.prod.yml up -d
+export DOCKERHUB_USERNAME="your-dockerhub-username"
+docker compose up -d
 ```
