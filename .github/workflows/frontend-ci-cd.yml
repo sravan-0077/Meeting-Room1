@@ -3,9 +3,6 @@ name: Frontend CI/CD Pipeline
 on:
   push:
     branches: [ main, master ]
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/frontend-ci-cd.yml'
   workflow_dispatch:
 
 jobs:
@@ -45,6 +42,4 @@ jobs:
         context: ./frontend
         file: ./frontend/Dockerfile
         push: true
-        tags: |
-          ${{ secrets.DOCKERHUB_USERNAME }}/auth-frontend:latest
-          ${{ secrets.DOCKERHUB_USERNAME }}/auth-frontend:${{ github.sha }}
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/auth-frontend:latest

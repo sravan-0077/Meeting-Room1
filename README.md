@@ -9,8 +9,8 @@ A modern full-stack web application featuring a Spring Boot REST API backend and
 ```
 codes-sravan/
 ├── .github/workflows/
-│   ├── backend-ci-cd.yml     # Build & push backend Docker image to Docker Hub
-│   └── frontend-ci-cd.yml    # Build & push frontend Docker image to Docker Hub
+│   ├── backend-ci-cd.yml     # Builds & pushes backend image to Docker Hub
+│   └── frontend-ci-cd.yml    # Builds & pushes frontend image to Docker Hub
 ├── backend/
 │   ├── Dockerfile            # Maven 3.9 + Java 17 multi-stage build
 │   ├── .dockerignore
@@ -26,27 +26,35 @@ codes-sravan/
 
 ---
 
-## 🔑 GitHub Secrets Troubleshooting & Checklist
+## 🔑 Required GitHub Repository Secrets
 
-If your GitHub workflow runs successfully but images do NOT appear in Docker Hub, verify the following **3 checklist items**:
+Set these in your GitHub Repo → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**:
 
-### 1. Check GitHub Secrets Names & Values
-Go to **GitHub Repository** -> **Settings** -> **Secrets and variables** -> **Actions**:
-- `DOCKERHUB_USERNAME`: Your exact Docker Hub account username (e.g., `sravan123`).
-- `DOCKERHUB_TOKEN`: A **Personal Access Token** generated from Docker Hub (**Account Settings** -> **Security** -> **New Access Token** with `Read, Write, Delete` permissions).
+| Secret Name | Example Value | Description |
+| :--- | :--- | :--- |
+| `DOCKERHUB_USERNAME` | `yourusername` | Your exact Docker Hub Username |
+| `DOCKERHUB_TOKEN` | `dckr_pat_xxxxx` | Your Docker Hub **Personal Access Token** |
 
-> [!IMPORTANT]
-> If `DOCKERHUB_USERNAME` is missing or misspelled in GitHub Secrets, the tag resolves to `/auth-backend:latest` (empty username), which Docker cannot push!
+---
 
-### 2. Verify Your Branch Name
-The workflows trigger on pushes to `main` or `master`:
-- If your default branch is `main` or `master`, make sure your push command is:
-  ```bash
-  git push origin main
-  ```
+## 🚀 How to Manually Trigger Workflow in GitHub
 
-### 3. Check GitHub Actions Run Logs
-1. Click the **Actions** tab in your GitHub repository.
-2. Click on the latest workflow run (**Backend CI/CD Pipeline** or **Frontend CI/CD Pipeline**).
-3. Click **Build & Push Docker Image to Docker Hub**.
-4. Check the step output for `docker/build-push-action` to ensure `push: true` executed and check the target image tag (e.g. `yourusername/auth-backend:latest`).
+1. Go to your GitHub Repository.
+2. Click the **Actions** tab at the top.
+3. Select **Backend CI/CD Pipeline** or **Frontend CI/CD Pipeline** on the left menu.
+4. Click **Run workflow** → Select `main` branch → Click **Run workflow**.
+
+---
+
+## 🐳 Docker Compose Usage
+
+### Local Build & Run
+```bash
+docker compose up --build
+```
+
+### Server Run from Docker Hub
+```bash
+export DOCKERHUB_USERNAME="yourusername"
+docker compose up -d
+```
