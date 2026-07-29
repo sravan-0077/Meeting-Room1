@@ -1,4 +1,7 @@
-const API_BASE_URL = 'http://localhost:8089/api/auth';
+// API Base URL - Uses relative path '/api/auth' (proxied by NGINX) or direct EC2 backend URL
+const API_BASE_URL = window.location.origin.includes('localhost:5173') || window.location.origin.includes('localhost:5174')
+  ? 'http://localhost:8088/api/auth'
+  : '/api/auth';
 
 export async function signUpUser({ fullName, email, password }) {
   const response = await fetch(`${API_BASE_URL}/signup`, {
