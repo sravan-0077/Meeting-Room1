@@ -4,89 +4,73 @@ A modern full-stack web application featuring a Spring Boot REST API backend and
 
 ---
 
-## 🚀 Project Overview
-
-- **Backend**: Spring Boot 3.2 (Java 17), Spring Security, Spring Data JPA, H2 In-Memory Database, JWT Auth.
-- **Frontend**: React (Vite), Glassmorphism Design System, Lucide Icons, Password Strength Indicator, Form Validation.
-
----
-
-## 📁 Directory Structure
+## 📁 Project Architecture & Workflows
 
 ```
 codes-sravan/
+├── .github/workflows/
+│   ├── backend-ci-cd.yml     # Build & Push backend image to Docker Hub
+│   └── frontend-ci-cd.yml    # Build & Push frontend image to Docker Hub
 ├── backend/
-│   ├── src/main/java/com/example/authdemo/
-│   │   ├── controller/      # REST API Controllers (AuthController)
-│   │   ├── dto/             # Data Transfer Objects (SignUpRequest, LoginRequest, AuthResponse)
-│   │   ├── model/           # JPA Entities (User)
-│   │   ├── repository/      # Spring Data Repositories (UserRepository)
-│   │   └── security/        # JWT & Security Configuration (SecurityConfig, JwtTokenProvider)
-│   ├── src/main/resources/  # application.properties & Database setup
-│   └── pom.xml              # Maven dependencies
-│
-└── frontend/
-    ├── src/
-    │   ├── components/      # React Components (Login, Signup, Dashboard, Navbar)
-    │   ├── services/        # API Integration layer (api.js)
-    │   ├── App.jsx          # Application Shell & Routing
-    │   └── index.css        # Glassmorphic Styling & Animations
-    ├── package.json
-    └── vite.config.js
+│   ├── Dockerfile            # Maven 3.9 + Java 17 multi-stage build
+│   ├── .dockerignore
+│   └── src/
+├── frontend/
+│   ├── Dockerfile            # Node 22 + NGINX Alpine multi-stage build
+│   ├── nginx.conf
+│   ├── .dockerignore
+│   └── src/
+├── docker-compose.yml        # Local development setup
+├── docker-compose.prod.yml   # Production EC2 Docker Hub deployment
+├── deploy-ec2.sh             # EC2 pull & deploy script
+└── README.md
 ```
 
 ---
 
-## 🛠️ How to Run the Application
+## 🔑 Required GitHub Secrets
 
-### 1. Start the Spring Boot Backend
+Set these in your GitHub Repo -> **Settings** -> **Secrets and variables** -> **Actions**:
 
-Open a terminal in `codes-sravan/backend`:
+| Secret Name | Description |
+| :--- | :--- |
+| `DOCKERHUB_USERNAME` | Your Docker Hub Username |
+| `DOCKERHUB_TOKEN` | Your Docker Hub Personal Access Token |
 
+---
+
+## 🐳 Docker Build & Push Workflow
+
+### Backend (`.github/workflows/backend-ci-cd.yml`)
+1. Checks out code and sets up JDK 17 (`temurin`).
+2. Builds Spring Boot package (`mvn clean package -DskipTests`).
+3. Logs into Docker Hub using `${{ secrets.DOCKERHUB_USERNAME }}` and `${{ secrets.DOCKERHUB_TOKEN }}`.
+4. Builds & pushes `${{ secrets.DOCKERHUB_USERNAME }}/auth-backend:latest`.
+
+### Frontend (`.github/workflows/frontend-ci-cd.yml`)
+1. Checks out code and sets up Node 22.
+2. Builds production React bundle (`npm run build`).
+3. Logs into Docker Hub using `${{ secrets.DOCKERHUB_USERNAME }}` and `${{ secrets.DOCKERHUB_TOKEN }}`.
+4. Builds & pushes `${{ secrets.DOCKERHUB_USERNAME }}/auth-frontend:latest`.
+
+---
+
+## ☁️ Deploying on AWS EC2
+
+### Step 1: Connect to your EC2 instance over SSH
 ```bash
-cd backend
-.\mvnw.cmd spring-boot:run
+ssh -i /path/to/key.pem ubuntu@YOUR_EC2_PUBLIC_IP
 ```
 
-The Spring Boot REST API will start at:  
-👉 **`http://localhost:8080`**
-
-H2 Database Console is available at:  
-👉 **`http://localhost:8080/h2-console`**  
-*(JDBC URL: `jdbc:h2:mem:authdb`, Username: `sa`, Password: `password`)*
-
----
-
-### 2. Start the React Frontend
-
-Open a second terminal in `codes-sravan/frontend`:
-
+### Step 2: Login to Docker Hub & Pull Images
 ```bash
-cd frontend
-npm install
-npm run dev
+echo "YOUR_DOCKERHUB_TOKEN" | docker login -u "YOUR_DOCKERHUB_USERNAME" --password-stdin
+docker pull YOUR_DOCKERHUB_USERNAME/auth-backend:latest
+docker pull YOUR_DOCKERHUB_USERNAME/auth-frontend:latest
 ```
 
-The React Web App will launch at:  
-👉 **`http://localhost:5173`**
-
----
-
-## ✨ Key Features
-
-1. **User Registration (Signup)**:
-   - Full Name, Email, Password, Confirm Password validation.
-   - Real-time visual password strength meter.
-   - Duplicate email prevention.
-   - Password hashing with BCrypt.
-
-2. **User Authentication (Login)**:
-   - Secure authentication returning JWT Bearer token.
-   - Toggle password visibility.
-   - Session persistence in `localStorage`.
-
-3. **User Dashboard**:
-   - Protected route requiring valid JWT token.
-   - Personalized greeting and user avatar generator.
-   - Real-time session status & account creation timestamp.
-   - One-click Logout clearing token & session.
+### Step 3: Launch Containers using Docker Compose
+```bash
+export DOCKERHUB_USERNAME="YOUR_DOCKERHUB_USERNAME"
+docker compose -f docker-compose.prod.yml up -d
+```

@@ -1,0 +1,9 @@
+target/
+.mvn/
+*.log
+.git
+.gitignore
+.idea
+*.iml
+maven.zip
+setup_maven.py

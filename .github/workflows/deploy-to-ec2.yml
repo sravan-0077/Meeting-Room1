@@ -1,0 +1,44 @@
+name: Deploy to AWS EC2
+
+on:
+  workflow_run:
+    workflows: ["Backend CI/CD Pipeline", "Frontend CI/CD Pipeline"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  deploy-to-ec2:
+    name: Deploy Container Images to AWS EC2
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Copy Compose & Deployment Script to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          source: "docker-compose.prod.yml,deploy-ec2.sh"
+          target: "~/app/"
+
+      - name: SSH into EC2 & Deploy Docker Containers
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          envs: GITHUB_REPOSITORY,GITHUB_ACTOR,CR_PAT
+          script: |
+            export GITHUB_REPOSITORY="${{ github.repository }}"
+            export GITHUB_ACTOR="${{ github.actor }}"
+            export CR_PAT="${{ secrets.GITHUB_TOKEN }}"
+            cd ~/app/
+            chmod +x deploy-ec2.sh
+            ./deploy-ec2.sh
