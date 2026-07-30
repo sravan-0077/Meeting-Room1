@@ -5,7 +5,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    image: ${DOCKERHUB_USERNAME:-local}/auth-backend:latest
+    image: ${DOCKER_USERNAME}/auth-backend:latest
     container_name: backend
     restart: unless-stopped
     ports:
@@ -17,7 +17,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    image: ${DOCKERHUB_USERNAME:-local}/auth-frontend:latest
+    image: ${DOCKER_USERNAME:-local}/auth-frontend:latest
     container_name: auth-frontend
     restart: unless-stopped
     ports:
