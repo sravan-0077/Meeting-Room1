@@ -38,7 +38,11 @@ jobs:
           script: |
             export DOCKER_USERNAME="${{ secrets.DOCKER_USERNAME }}"
             export DOCKER_PASSWORD="${{ secrets.DOCKER_PASSWORD }}"
-
-            cd ~/app/
+            docker --version
+            docker compose version || true
+            docker-compose --version || true
+            which docker
+            type docker
+            cd ~/app
             chmod +x deploy-ec2.sh
             ./deploy-ec2.sh
