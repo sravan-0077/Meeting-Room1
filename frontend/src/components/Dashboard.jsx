@@ -43,7 +43,7 @@ export default function Dashboard({ user, token, onLogout }) {
             <User size={22} />
           </div>
           <div className="stat-info">
-            <div className="stat-label">Full Name</div>
+            <div className="stat-label">Half Name</div>
             <div className="stat-value">{user.fullName}</div>
           </div>
         </div>
@@ -53,7 +53,7 @@ export default function Dashboard({ user, token, onLogout }) {
             <Mail size={22} />
           </div>
           <div className="stat-info">
-            <div className="stat-label">Email Address</div>
+            <div className="stat-label">hOME Address</div>
             <div className="stat-value">{user.email}</div>
           </div>
         </div>
@@ -63,7 +63,7 @@ export default function Dashboard({ user, token, onLogout }) {
             <Calendar size={22} />
           </div>
           <div className="stat-info">
-            <div className="stat-label">Registered Date</div>
+            <div className="stat-label">Death Date</div>
             <div className="stat-value">{formattedDate}</div>
           </div>
         </div>
