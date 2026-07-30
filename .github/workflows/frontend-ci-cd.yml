@@ -42,4 +42,4 @@ jobs:
         context: ./frontend
         file: ./frontend/Dockerfile
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/auth-frontend:latest
+        tags: ${{ secrets.DOCKER_USERNAME }}/auth-frontend:latest
