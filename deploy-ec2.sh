@@ -8,13 +8,13 @@ echo "$DOCKER_PASSWORD" | docker login \
   --password-stdin
 
 echo "Pulling latest images..."
-docker compose -f docker-compose.prod.yml pull
+docker-compose -f docker-compose.prod.yml pull
 
 echo "Stopping existing containers..."
-docker compose -f docker-compose.prod.yml down
+docker-compose -f docker-compose.prod.yml down
 
 echo "Starting updated containers..."
-docker compose -f docker-compose.prod.yml up -d
+docker-compose -f docker-compose.prod.yml up -d
 
 echo "Cleaning up unused Docker images..."
 docker image prune -f
